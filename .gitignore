@@ -1,0 +1,20 @@
+# Unreal generated
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+Backup/
+Build/
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.suo
+*.xcodeproj
+*.xcworkspace
+UpgradeLog.htm
+# IDE
+.vs/
+.idea/
+# Claude local state
+Resources/.claude/

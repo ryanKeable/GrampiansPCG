@@ -1,0 +1,11 @@
+{
+  "kanban-markdown.featuresDirectory": "Resources/Docs/Kanban",
+  "kanban-markdown.columns": [
+    { "id": "backlog", "name": "Backlog", "color": "#6b7280" },
+    { "id": "in-progress", "name": "In Progress", "color": "#f59e0b" },
+    { "id": "ready-to-test", "name": "Ready To Test", "color": "#3b82f6" },
+    { "id": "verified", "name": "Verified", "color": "#22c55e" },
+    { "id": "failed", "name": "Failed", "color": "#ef4444" },
+    { "id": "closed", "name": "Closed", "color": "#a855f7" }
+  ]
+}
