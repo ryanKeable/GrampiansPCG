@@ -1,6 +1,6 @@
 ---
 id: "m01-project-setup-2026-11-11--pcg-install"
-status: "in-progress"
+status: "ready-to-test"
 priority: "medium"
 assignee: null
 epic: "m01-project-setup-2026-11-11"
@@ -75,4 +75,38 @@ Deferred (not needed by Plan.md yet): PCGFastGeoInterop (adds FastGeoStreaming; 
 - **Pitfall found:** `Filter_RandomChoice` keeps every point when `randomPerDataset` is true and there is one dataset. Set it to false to thin points. Written into the RandomFilter graph description.
 - **Mesh Terrain blocker:** both MeshPartition actors have `megaMeshComponent = None`, so no terrain exists. `Get_MeshTerrain` returns no data, and `PCG_Smoke_MeshTerrain_Write` warns "No Valid Input Data Found". The earlier "weak proof" for `PCG_Smoke_MeshTerrain` is therefore not a proof at all: it reads an empty actor. Terrain has to be created first (MeshTerrainMode tools or a Write from a heightmap). Parked in the backlog ticket, item 1; the fix is a new toolset and skill, ticketed as [Project MeshTerrain toolset and skill](backlog-meshterrain-toolset-2026-11-12.md) (user, 2026-11-12: "this sounds like an example of a new toolset/skill we will need to build"). Also: `PCGToolset.PCGSpatialToolset` exists and has not been read yet.
 - Not buildable as self-contained samples: GeometryScript `CombineActors` needs world actors tagged `MyTag`; `Simplify` was fine because it builds its own cube.
-- Req 7, 8: deferred to a follow-up card (user decision, 2026-11-12). Req 6: not started.
+- Req 7, 8: deferred to a follow-up card (user decision, 2026-11-12). Req 6: done, commits `aeed93a` (plugins, samples, `L_Smoke`, docs) and `52c8da1` (Sample level files). Not pushed. `Content/PCG/PCG_MCPSmokeTest.uasset` left untracked on purpose.
+
+### Final status (2026-11-12)
+| Req | Result |
+|---|---|
+| 1 plugin list | Done. |
+| 2 enabled | `.uproject` done; Editor > Plugins UI check not done (no MCP route), left for the user. |
+| 3 loads clean | Done. |
+| 4 samples | 9 graphs, 7 proven (Core, Primitives, RadialScatter, RandomFilter, WriteNoise, GeometryScript BooleanOp, GeometryScript Simplify). 2 unproven (MeshTerrain, MeshTerrain_Write): no terrain exists. Not built: PythonInterop, BiomeCore, GeometryScript CombineActors (see backlog). Evidence is JPEG captures for the two GeometryScript graphs only; the rest are proven by point counts and data views. |
+| 5 MCP | All 9 graphs listed, described and structure-read over `PCGToolset`. |
+| 6 committed | Done, not pushed. |
+| 7, 8 | Deferred. |
+
+## Autopsy (process and outcome)
+
+**Outcome.** Req 4's intent, "one proven sample per required plugin", was only partly met: seven small graphs work and cover core PCG, PCGPrimitives, GeometryScripting and PCGGeometryScriptInterop. The Mesh Partition plugins, PCGBiomeCore and PCGPythonInterop have no proven sample. The design principle the user set (many tiny single-use-case samples with `USE WHEN ... SHOWS ...` descriptions) works well and is the main reusable result.
+
+**What went well.**
+- Wrapping a plugin primitive or sample with `AddSubgraphNode` made each sample 2 to 4 nodes, and it accepts graphs outside `ListAvailableSubgraphs`.
+- `ProgrammaticToolset.execute_tool_script` batched 100+ calls (strip the level, build and execute graphs).
+- Checking each graph's data (counts, attribute values) caught real problems: the Primitives description said 121 points (it was 100) and `Filter_RandomChoice` returned all points.
+
+**What went wrong, and what to do differently.**
+1. **Wrong "can't be done" claim (levels).** I told the user level creation needed them, after reading only `SceneTools`. It worked through `AssetTools.move` plus `save_assets`. Fix: `describe_toolset` every plausible toolset before saying a step needs the user. Already filed on the claude-rules card.
+2. **Trusted a new level to be empty.** `L_Smoke` arrived as a copy of the Sample level (132 stray actors). Fix: list a new level's actors before using it.
+3. **Weak proof accepted too long.** `PCG_Smoke_MeshTerrain` "executed with no messages" and returned `{"data_version":0}`, and I recorded it as a weak pass. It was reading an empty actor. A single `get_properties` on the actor (`megaMeshComponent: None`) would have shown this much earlier. Fix: when a read returns nothing, check the source object before building on it. Do not count "no errors" as a pass.
+4. **Built the Write sample before proving the Read.** Costs two builds, one warning. Fix: prove each stage of a chain before adding the next.
+5. **Sizeable context cost from tool output.** `describe_toolset` for large toolsets and 1.9 MB viewport captures (a hook blocks reading them). Fix: decode captures to a small JPEG straight from the saved file, and describe only the toolset needed. Costs were acceptable but the session ran long (about 2.6 hours) and was compacted once.
+6. **Scope was unclear at the start.** The card said "one graph per plugin"; the user's real intent was "many simple examples across use cases". It took two statements from the user to land it. Fix: when a card's wording and the stated purpose (reference examples for Claude) differ, ask which wins before building.
+
+**Recommendations to carry forward.**
+- Keep the sample set growing as small use-case graphs; revisit via the backlog tickets.
+- Mesh Terrain creation needs a new toolset and skill: [Project MeshTerrain toolset and skill](backlog-meshterrain-toolset-2026-11-12.md).
+- Add the toolset-check and "verify the source object" rules to `pgen-unreal` (decided on the claude-rules card).
+- A hypothesis for this card, stated up front, would have been: "can Claude build and verify PCG graphs over MCP alone?" Answer: yes for points, filters, attributes and GeometryScript samples; no for creating Mesh Terrain, BiomeCore and Python nodes.
