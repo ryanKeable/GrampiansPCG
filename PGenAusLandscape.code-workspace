@@ -19,6 +19,7 @@
 			{ "id": "failed", "name": "Failed", "color": "#ef4444" },
 			{ "id": "closed", "name": "Closed", "color": "#a855f7" }
 		],
+		"dotnet.defaultSolution": "disable",
 		"js/ts.tsc.autoDetect": "off",
 		"npm.autoDetect": "off",
 		"terminal.integrated.env.windows": {
@@ -31,8 +32,7 @@
 	},
 	"extensions": {
 		"recommendations": [
-			"ms-vscode.cpptools",
-			"ms-dotnettools.csharp"
+			"ms-vscode.cpptools"
 		]
 	},
 	"tasks": {
@@ -475,6 +475,13 @@
 	"launch": {
 		"version": "0.2.0",
 		"configurations": [
+			{
+				"name": "Attach to UnrealEditor",
+				"type": "cppvsdbg",
+				"request": "attach",
+				"processId": "${command:pickProcess}",
+				"visualizerFile": "C:\\Program Files\\UE_5.8\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+			},
 			{
 				"name": "Launch PGenAusLandscape (Debug)",
 				"request": "launch",

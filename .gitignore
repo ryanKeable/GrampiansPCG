@@ -78,3 +78,8 @@ DerivedDataCache/*
 Backup/
 UpgradeLog.htm
 Resources/.claude/
+.claude/settings.local.json
+
+# VS Code generated (UBT -vscode)
+.vscode/compileCommands_*
+*.slnx
